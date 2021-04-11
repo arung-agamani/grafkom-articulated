@@ -8,8 +8,11 @@ function cos_sine(rad) {
 
 class GLObject {
     public id: number;
-    public va: number[];
+    public points: number[];
+    public indices: number[];
+    public wireIndices: Uint16Array;
     public shader: WebGLProgram;
+    public wireShader: WebGLProgram | null = null;
     public pos: [number, number, number];
     public rot3: [number, number, number];
     public scale: [number, number, number];
@@ -19,6 +22,9 @@ class GLObject {
     public parentTransfomationMatrix: number[];
     public anchorPoint: number[];
     public parentAnchorPoint: number[];
+    public vbo: WebGLBuffer
+    public vboIndices: WebGLBuffer
+    public wireBuffer: WebGLBuffer
 
     public sceneDepth: number;
 
@@ -55,8 +61,28 @@ class GLObject {
         
     }
 
-    setVertexArray(va: number[]) {
-        this.va = va;
+    setPoints(points: number[]) {
+        this.points = points;
+    }
+
+    setIndices(indices: number[]) {
+        this.indices = indices;
+
+        // make wire indices
+        const wireIndices = new Uint16Array(indices.length * 2)
+        let j = 0;
+        for (let i = 0; i < indices.length; i += 3) {
+            wireIndices[j++] = indices[i];
+            wireIndices[j++] = indices[i + 1];
+
+            wireIndices[j++] = indices[i + 1];
+            wireIndices[j++] = indices[i + 2];
+
+            wireIndices[j++] = indices[i + 2];
+            wireIndices[j++] = indices[i];
+        }
+        this.wireIndices = wireIndices
+
     }
 
     setPosition(x: number, y: number, z: number) {
@@ -79,6 +105,19 @@ class GLObject {
         if (!this.childs.find(x => x.id === obj.id)) {
             this.childs.push(obj);
         }
+    }
+
+    setWireShader(shader: WebGLProgram) {
+        this.wireShader = shader
+    }
+
+    getPoint(index: number) {
+        if(index >= this.points.length / 3) return null
+        let point = []
+        for(var i = 0; i < 3; i++){
+            point.push(this.points[index * 3 + i])
+        }
+        return point
     }
 
     
@@ -204,7 +243,7 @@ class GLObject {
             this.parentTransfomationMatrix,
             localProjectionMat
         )
-        console.log(`P: ${projectionMat}`)
+        // console.log(`P: ${projectionMat}`)
         // console.log(projectionMat)
         return projectionMat
     }
@@ -213,29 +252,61 @@ class GLObject {
         const gl = this.gl
         const vbo = gl.createBuffer()
         gl.bindBuffer(gl.ARRAY_BUFFER, vbo)
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.va), gl.STATIC_DRAW)
-        console.log(this.va)
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.points), gl.STATIC_DRAW)
+        
+        const vboIndices = gl.createBuffer()
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vboIndices)
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW)
+        const wireBuffer = gl.createBuffer()
+        
+        this.vbo = vbo
+        this.vboIndices = vboIndices
+
+        if(this.wireShader !== null) {
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, wireBuffer)
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.wireIndices, gl.STATIC_DRAW)
+            this.wireBuffer = wireBuffer
+        }
+
     }
 
     draw() {
         const gl = this.gl
-        const vbo = gl.createBuffer()
-        gl.bindBuffer(gl.ARRAY_BUFFER, vbo)
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.va), gl.STATIC_DRAW)
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo)
         gl.useProgram(this.shader)
+        
         var vertexPos = gl.getAttribLocation(this.shader, 'a_pos')
         var uniformCol = gl.getUniformLocation(this.shader, 'u_fragColor')
         var uniformPos = gl.getUniformLocation(this.shader, 'u_proj_mat')
         var uniformRes = gl.getUniformLocation(this.shader, 'u_resolution')
+        
         gl.enableVertexAttribArray(vertexPos)
         gl.vertexAttribPointer(vertexPos, 3, gl.FLOAT, false, 0, 0)
-        console.log(this.projectionMat)
+        // console.log(this.projectionMat)
         gl.uniformMatrix4fv(uniformPos, false, this.projectionMat)
         gl.uniform4fv(uniformCol, [1.0, 0.0, 0.0, 1.0])
         gl.uniform3fv(uniformRes, [gl.canvas.width, gl.canvas.height, this.sceneDepth])
-        gl.drawArrays(gl.TRIANGLES, 0, this.va.length/3)
-        gl.uniform4fv(uniformCol, [0.0, 0.0, 1.0, 1.0])
-        gl.drawArrays(gl.LINES, 0, this.va.length/3)
+
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.vboIndices)
+        gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0)
+        
+        if(this.wireShader !== null) {
+            console.log("WIRE SHADER")
+            gl.useProgram(this.wireShader)
+            var vertexPos = gl.getAttribLocation(this.wireShader, 'a_pos')
+            var uniformCol = gl.getUniformLocation(this.wireShader, 'u_fragColor')
+            var uniformPos = gl.getUniformLocation(this.wireShader, 'u_proj_mat')
+            var uniformRes = gl.getUniformLocation(this.wireShader, 'u_resolution')
+            gl.enableVertexAttribArray(vertexPos)
+            gl.vertexAttribPointer(vertexPos, 3, gl.FLOAT, false, 0, 0)
+            gl.uniformMatrix4fv(uniformPos, false, this.projectionMat)
+            gl.uniform4fv(uniformCol, [0.0, 0.0, 0.0, 1.0])
+            gl.uniform3fv(uniformRes, [gl.canvas.width, gl.canvas.height, this.sceneDepth])
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.wireBuffer)
+            gl.drawElements(gl.LINES, this.wireIndices.length, gl.UNSIGNED_SHORT, 0)
+        } 
+
         const proj = this.calcProjectionMatrix()
         // if (this.id === 0)
         //     console.log(proj)

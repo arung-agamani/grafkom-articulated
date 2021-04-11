@@ -3,6 +3,7 @@ import { fetchShader } from './loaders/shader'
 import GLObject from './GLObject'
 import Renderer from './renderer'
 import { GLOperationMode, GLDrawMode } from './types/glTypes'
+import makeCube from './models/cube'
 
 var canvas = document.getElementById('webgl-app') as HTMLCanvasElement
 canvas.width = 800
@@ -27,50 +28,6 @@ async function main() {
     gl.clearColor(1,1,1,1)
     gl.clear(gl.COLOR_BUFFER_BIT)
     console.log('initialized')
-    const baseVal = 100
-    const triangleData = [
-        0,0,0,
-        baseVal,0,0,
-        0,baseVal,0,
-        baseVal,0,0,
-        0,baseVal,0,
-        baseVal,baseVal,0,
-
-        0,0,baseVal,
-        baseVal,0,baseVal,
-        0,baseVal,baseVal,
-        baseVal,0,baseVal,
-        0,baseVal,baseVal,
-        baseVal,baseVal,baseVal,
-
-        0,0,0,
-        0,baseVal,0,
-        0,0,baseVal,
-        0,baseVal,0,
-        0,0,baseVal,
-        0,baseVal,baseVal,
-
-        baseVal,0,0,
-        baseVal,baseVal,0,
-        baseVal,0,baseVal,
-        baseVal,baseVal,0,
-        baseVal,0,baseVal,
-        baseVal,baseVal,baseVal,
-        
-        0,0,0,
-        baseVal,0,0,
-        0,0,baseVal,
-        baseVal,0,0,
-        0,0,baseVal,
-        baseVal,0,baseVal,
-
-        0,baseVal,0,
-        baseVal,baseVal,0,
-        0,baseVal,baseVal,
-        baseVal,baseVal,0,
-        0,baseVal,baseVal,
-        baseVal,baseVal,baseVal
-    ]
     
     var vert = await fetchShader('draw-vert.glsl')
     var frag = await fetchShader('draw-frag.glsl')
@@ -91,6 +48,27 @@ async function main() {
     gl.attachShader(shaderProgram, vertShader)
     gl.attachShader(shaderProgram, fragShader)
     gl.linkProgram(shaderProgram)
+
+    var wireVert = await fetchShader('wire-vert.glsl')
+    var wireFrag = await fetchShader('wire-frag.glsl')
+    
+    var wireVertShader = gl.createShader(gl.VERTEX_SHADER)
+    gl.shaderSource(wireVertShader, wireVert)
+    gl.compileShader(wireVertShader)
+    if (!gl.getShaderParameter(wireVertShader, gl.COMPILE_STATUS)) {
+        alert('Error when compiling shaders: ' + gl.getShaderInfoLog(wireVertShader))
+    }
+    var wireFragShader = gl.createShader(gl.FRAGMENT_SHADER)
+    gl.shaderSource(wireFragShader, wireFrag)
+    gl.compileShader(wireFragShader)
+    if (!gl.getShaderParameter(wireFragShader, gl.COMPILE_STATUS)) {
+        alert('Error when compiling shaders: ' + gl.getShaderInfoLog(wireFragShader))
+    }
+    var wireShaderProgram = gl.createProgram()
+    gl.attachShader(wireShaderProgram, wireVertShader)
+    gl.attachShader(wireShaderProgram, wireFragShader)
+    gl.linkProgram(wireShaderProgram)
+
 
     /* var selectVert = await fetchShader('select-vert.glsl')
     var selectFrag = await fetchShader('select-frag.glsl')
@@ -131,38 +109,37 @@ async function main() {
         document.getElementById('rt-mousepos').dispatchEvent(evt)
 
     }, false)
-    
-   
-    const glObject = new GLObject(0, shaderProgram, gl)
-    glObject.setVertexArray(triangleData)
+
+    const glObject = makeCube(0, shaderProgram, gl)
     glObject.setAnchorPoint([0,0,0], 3)
     glObject.setPosition(200,200,0)
     glObject.setRotation(0,45,0)
     glObject.setScale(1,1,1)
+    glObject.setWireShader(wireShaderProgram)
     glObject.bind()
 
-    const glObject2 = new GLObject(1, shaderProgram, gl)
-    glObject2.setVertexArray(triangleData)
-    glObject2.setAnchorPoint([100,100,100], 3)
+    const glObject2 = makeCube(1, shaderProgram, gl)
+    glObject2.setAnchorPoint(glObject.getPoint(4), 3)
     glObject2.setPosition(0,0,0)
     glObject2.setRotation(0,0,0)
     glObject2.setScale(1,1,1)
+    glObject2.setWireShader(wireShaderProgram)
     glObject2.bind()
 
-    const glObject3 = new GLObject(2, shaderProgram, gl)
-    glObject3.setVertexArray(triangleData)
-    glObject3.setAnchorPoint([100,100,100], 3)
+    const glObject3 = makeCube(2, shaderProgram, gl)
+    glObject3.setAnchorPoint(glObject2.getPoint(2), 3)
     glObject3.setPosition(0,0,0)
     glObject3.setRotation(0,0,0)
     glObject3.setScale(1,1,1)
+    glObject3.setWireShader(wireShaderProgram)
     glObject3.bind()
 
-    const glObject4 = new GLObject(3, shaderProgram, gl)
-    glObject4.setVertexArray(triangleData)
-    glObject4.setAnchorPoint([100,100,100], 3)
+    const glObject4 = makeCube(3, shaderProgram, gl)
+    glObject4.setAnchorPoint(glObject4.getPoint(1), 3)
     glObject4.setPosition(0,0,0)
     glObject4.setRotation(0,0,0)
     glObject4.setScale(1,1,1)
+    glObject4.setWireShader(wireShaderProgram)
     glObject4.bind()
 
     // parent;

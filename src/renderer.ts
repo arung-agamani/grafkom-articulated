@@ -25,6 +25,12 @@ class Renderer {
             obj.draw()
         }
     }
+
+    renderSelect() {
+        for (const obj of this.objectList) {
+            obj.drawSelect()
+        }
+    }
 }
 
 export default Renderer

@@ -6,7 +6,7 @@ import { GLOperationMode, GLDrawMode } from './types/glTypes'
 import makeCube from './models/cube'
 
 var canvas = document.getElementById('webgl-app') as HTMLCanvasElement
-canvas.width = 800
+canvas.width = 1000
 canvas.height = 600
 var gl = canvas.getContext('webgl2')
 
@@ -17,7 +17,9 @@ let appState = {
     },
     rotation: 0,
     operationMode: GLOperationMode.SELECT,
-    drawMode: GLDrawMode.LINE
+    drawMode: GLDrawMode.LINE,
+    selectedId: -1,
+    selectedColor: [],
 }
 
 async function main() {
@@ -69,8 +71,7 @@ async function main() {
     gl.attachShader(wireShaderProgram, wireFragShader)
     gl.linkProgram(wireShaderProgram)
 
-
-    /* var selectVert = await fetchShader('select-vert.glsl')
+    var selectVert = await fetchShader('select-vert.glsl')
     var selectFrag = await fetchShader('select-frag.glsl')
     
     var selectVertShader = gl.createShader(gl.VERTEX_SHADER)
@@ -88,7 +89,7 @@ async function main() {
     var selectProgram = gl.createProgram()
     gl.attachShader(selectProgram, selectVertShader)
     gl.attachShader(selectProgram, selectFragShader)
-    gl.linkProgram(selectProgram) */
+    gl.linkProgram(selectProgram)
 
     // mouseevent block
     canvas.addEventListener('mousemove', (event) => {
@@ -110,42 +111,92 @@ async function main() {
 
     }, false)
 
-    const glObject = makeCube(0, shaderProgram, gl)
+    canvas.addEventListener('click', (event) => {
+        if (appState.selectedId >= 0) {
+            const object = objects[appState.selectedId];
+            object.color = appState.selectedColor;
+            appState.selectedId = -1;
+        }
+
+        if(oldPickNdx >= 0){
+            appState.selectedId = oldPickNdx
+            appState.selectedColor = oldPickColor
+            objects[appState.selectedId].color = [0.0, 1.0, 0.0, 1.0]
+            document.getElementById("rot_slider1").value = objects[appState.selectedId].rot3[0]
+            document.getElementById("rot_slider2").value = objects[appState.selectedId].rot3[1]
+            document.getElementById("rot_slider3").value = objects[appState.selectedId].rot3[2]
+        }
+    })
+
+    let objects = []
+
+    const glObject = makeCube(1, shaderProgram, gl)
     glObject.setAnchorPoint([0,0,0], 3)
-    glObject.setPosition(200,200,0)
-    glObject.setRotation(0,45,0)
+    glObject.setPosition(200,200,700)
+    glObject.setRotation(0,0,0)
     glObject.setScale(1,1,1)
     glObject.setWireShader(wireShaderProgram)
+    glObject.setSelectShader(selectProgram)
     glObject.bind()
 
-    const glObject2 = makeCube(1, shaderProgram, gl)
-    glObject2.setAnchorPoint(glObject.getPoint(4), 3)
+    const glObject2 = makeCube(2, shaderProgram, gl)
+    glObject2.setAnchorPoint(glObject.getPoint(6), 3)
     glObject2.setPosition(0,0,0)
     glObject2.setRotation(0,0,0)
     glObject2.setScale(1,1,1)
     glObject2.setWireShader(wireShaderProgram)
+    glObject2.setSelectShader(selectProgram)
     glObject2.bind()
 
-    const glObject3 = makeCube(2, shaderProgram, gl)
+    const glObject3 = makeCube(3, shaderProgram, gl)
     glObject3.setAnchorPoint(glObject2.getPoint(2), 3)
     glObject3.setPosition(0,0,0)
     glObject3.setRotation(0,0,0)
     glObject3.setScale(1,1,1)
     glObject3.setWireShader(wireShaderProgram)
+    glObject3.setSelectShader(selectProgram)
     glObject3.bind()
 
-    const glObject4 = makeCube(3, shaderProgram, gl)
+    const glObject4 = makeCube(4, shaderProgram, gl)
     glObject4.setAnchorPoint(glObject4.getPoint(1), 3)
     glObject4.setPosition(0,0,0)
     glObject4.setRotation(0,0,0)
     glObject4.setScale(1,1,1)
     glObject4.setWireShader(wireShaderProgram)
+    glObject4.setSelectShader(selectProgram)
     glObject4.bind()
+
+    const glObject5 = makeCube(5, shaderProgram, gl)
+    glObject5.setAnchorPoint([500, 200, 0], 3)
+    glObject5.setPosition(700,200,700)
+    glObject5.setRotation(0,0,0)
+    glObject5.setScale(1,1,1)
+    glObject5.setWireShader(wireShaderProgram)
+    glObject5.setSelectShader(selectProgram)
+    glObject5.bind()
+
+    const glObject6 = makeCube(6, shaderProgram, gl)
+    glObject6.setAnchorPoint(glObject5.getPoint(5), 3)
+    glObject6.setPosition(0,0,0)
+    glObject6.setRotation(0,0,0)
+    glObject6.setScale(1,1,1)
+    glObject6.setWireShader(wireShaderProgram)
+    glObject6.setSelectShader(selectProgram)
+    glObject6.bind()
 
     // parent;
     glObject3.addChild(glObject4)
     glObject2.addChild(glObject3)
     glObject.addChild(glObject2)
+
+    glObject5.addChild(glObject6)
+
+    objects.push(glObject)
+    objects.push(glObject2)
+    objects.push(glObject3)
+    objects.push(glObject4)
+    objects.push(glObject5)
+    objects.push(glObject6)
 
     canvas.addEventListener('ui-rotate', (e: CustomEvent) => {
         console.log('ui-rotate event')
@@ -153,17 +204,20 @@ async function main() {
         console.log('appstate-rot' + appState.rotation)
         switch (e.detail.id) {
             case 0:
-                glObject.setRotation(appState.rotation, appState.rotation, appState.rotation)
+                objects[appState.selectedId].setRotation(appState.rotation, objects[appState.selectedId].rot3[1], objects[appState.selectedId].rot3[2])
+                // glObject.setRotation(appState.rotation, appState.rotation, appState.rotation)
                 break;
             case 1:
-                glObject2.setRotation(appState.rotation, appState.rotation, appState.rotation)
+                objects[appState.selectedId].setRotation(objects[appState.selectedId].rot3[0], appState.rotation, objects[appState.selectedId].rot3[2])
+            //     glObject2.setRotation(appState.rotation, appState.rotation, appState.rotation)
                 break;
             case 2:
-                glObject3.setRotation(appState.rotation, appState.rotation, appState.rotation)
+                objects[appState.selectedId].setRotation(objects[appState.selectedId].rot3[0], objects[appState.selectedId].rot3[1], appState.rotation)
+            //     glObject3.setRotation(appState.rotation, appState.rotation, appState.rotation)
                 break;
-            case 3:
-                glObject4.setRotation(appState.rotation, appState.rotation, appState.rotation)
-                break;
+            // case 3:
+            //     glObject4.setRotation(appState.rotation, appState.rotation, appState.rotation)
+            //     break;
         
             default:
                 break;
@@ -175,27 +229,86 @@ async function main() {
     })
 
     const renderer = new Renderer()
-    renderer.addObject(glObject);
+    renderer.addObject(glObject)
+    renderer.addObject(glObject5)
+
+    // Create a texture to render to
+    const targetTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, targetTexture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+    // create a depth renderbuffer
+    const depthBuffer = gl.createRenderbuffer();
+    gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer);
+
+    function setFramebufferAttachmentSizes(width, height) {
+        gl.bindTexture(gl.TEXTURE_2D, targetTexture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+        gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer);
+        gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height);
+    }
+
+    const fb = gl.createFramebuffer()
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fb)
+
+    // attach the texture as the first color attachment
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, targetTexture, 0);
+
+    // make a depth buffer and the same size as the targetTexture
+    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer);
+    
+    let oldPickNdx = -1
+    let oldPickColor
 
     function render(now: number) {
+
+        setFramebufferAttachmentSizes(gl.canvas.width, gl.canvas.height);
+        
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fb)
         gl.viewport(0,0, gl.canvas.width, gl.canvas.height)
+        gl.enable(gl.CULL_FACE)
         gl.enable(gl.DEPTH_TEST)
-        gl.clearColor(1,1,1,1)
+    
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-        /* gl.useProgram(selectProgram)
-        const resolutionPos = gl.getUniformLocation(selectProgram, 'u_resolution')
-        gl.uniform2f(resolutionPos, gl.canvas.width, gl.canvas.height)
-        renderer.renderTex(selectProgram)
-        // getting the pixel value
-        const pixelX = appState.mousePos.x * gl.canvas.width / canvas.clientWidth
-        const pixelY = gl.canvas.height - appState.mousePos.y * gl.canvas.height / canvas.clientHeight - 1
-        const data = new Uint8Array(4)
-        gl.readPixels(pixelX, pixelY, 1,1, gl.RGBA, gl.UNSIGNED_BYTE, data)
-        const id = data[0] + (data[1] << 8) + (data[2] << 16) + (data[3] << 24)
-        console.log(id)
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null) */
+
+        renderer.renderSelect()
+
+        const pixelX = appState.mousePos.x * gl.canvas.width / canvas.clientWidth;
+        const pixelY = gl.canvas.height - appState.mousePos.y * gl.canvas.height / canvas.clientHeight - 1;
+        const data = new Uint8Array(4);
+        gl.readPixels(
+            pixelX,            // x
+            pixelY,            // y
+            1,                 // width
+            1,                 // height
+            gl.RGBA,           // format
+            gl.UNSIGNED_BYTE,  // type
+            data);             // typed array to hold result
+        const id = data[0] + (data[1] << 8) + (data[2] << 16) + (data[3] << 24);
+
+        if (oldPickNdx >= 0) {
+            const object = objects[oldPickNdx];
+            object.color = oldPickColor;
+            oldPickNdx = -1;
+        }
+        
+        if (id > 0) {
+            oldPickNdx = id - 1;
+            const object = objects[oldPickNdx];
+            oldPickColor = object.color;
+            object.color = [1.0, 1.0, 0.0, 1.0]
+        }
+        
+        if (appState.selectedId >= 0) {
+            const object = objects[appState.selectedId]
+            object.color = [0.0, 1.0, 0.0, 1.0]
+        }
         // draw the actual objects
-        gl.useProgram(shaderProgram)
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
         renderer.render()
         requestAnimationFrame(render)
     }

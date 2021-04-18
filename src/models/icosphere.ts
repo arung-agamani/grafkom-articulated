@@ -5,17 +5,11 @@ class Icosphere {
   public indices: Array<number>
   public object: GLObject
   public radius: number
-  public id: number
-  public gl: WebGL2RenderingContext
-  public shader: WebGLProgram
   public subdivisions: number
 
-  constructor(id: number, shader: WebGLProgram, gl: WebGL2RenderingContext){
+  constructor(){
     this.radius = 100
     this.subdivisions = 0
-    this.id = id
-    this.gl = gl
-    this.shader = shader
     this.init()
   }
 
@@ -141,10 +135,11 @@ class Icosphere {
     this.indices.push(i3)
   }
 
-  public getObject(){
-    let glObject = new GLObject(this.id, this.shader, this.gl)
+  public getObject(id: number, shader: WebGLProgram, gl: WebGL2RenderingContext){
+    let glObject = new GLObject(id, shader, gl)
     glObject.setPoints(this.points)
     glObject.setIndices(this.indices)
+    glObject.bind()
     return glObject;
   }
 

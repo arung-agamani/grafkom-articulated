@@ -1,5 +1,12 @@
-precision mediump float;
+#version 300 es
+precision highp float;
+
+in vec2 v_texcoord;
 uniform vec4 u_fragColor;
+
+uniform sampler2D u_texture;
+out vec4 outColor;
+
 void main() {
-    gl_FragColor = u_fragColor;
+    outColor = texture(u_texture, v_texcoord);
 }

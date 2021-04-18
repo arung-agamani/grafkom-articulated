@@ -4,6 +4,8 @@ import GLObject from './GLObject'
 import Renderer from './renderer'
 import { GLOperationMode, GLDrawMode } from './types/glTypes'
 import makeCube from './models/cube'
+import makeIcosphere from './models/icosphere'
+import Icosphere from './models/icosphere'
 
 var canvas = document.getElementById('webgl-app') as HTMLCanvasElement
 canvas.width = 1000
@@ -167,7 +169,7 @@ async function main() {
     glObject4.bind()
 
     const glObject5 = makeCube(5, shaderProgram, gl)
-    glObject5.setAnchorPoint([500, 200, 0], 3)
+    glObject5.setAnchorPoint([0, 0, 0], 3)
     glObject5.setPosition(700,200,700)
     glObject5.setRotation(0,0,0)
     glObject5.setScale(1,1,1)
@@ -175,8 +177,20 @@ async function main() {
     glObject5.setSelectShader(selectProgram)
     glObject5.bind()
 
-    const glObject6 = makeCube(6, shaderProgram, gl)
-    glObject6.setAnchorPoint(glObject5.getPoint(5), 3)
+    var icosphere = new Icosphere(6, shaderProgram, gl)
+    icosphere.setRadius(100)
+    icosphere.setSubdivision(1)
+    const glObject7 = icosphere.getObject()
+    glObject7.setAnchorPoint(glObject5.getPoint(5), 3)
+    glObject7.setPosition(0,0,0)
+    glObject7.setRotation(0,0,0)
+    glObject7.setScale(1,1,1)
+    glObject7.setWireShader(wireShaderProgram)
+    glObject7.setSelectShader(selectProgram)
+    glObject7.bind()
+
+    const glObject6 = makeCube(7, shaderProgram, gl)
+    glObject6.setAnchorPoint(glObject7.getPoint(6), 3)
     glObject6.setPosition(0,0,0)
     glObject6.setRotation(0,0,0)
     glObject6.setScale(1,1,1)
@@ -188,14 +202,15 @@ async function main() {
     glObject3.addChild(glObject4)
     glObject2.addChild(glObject3)
     glObject.addChild(glObject2)
-
-    glObject5.addChild(glObject6)
+    glObject5.addChild(glObject7)
+    glObject7.addChild(glObject6)
 
     objects.push(glObject)
     objects.push(glObject2)
     objects.push(glObject3)
     objects.push(glObject4)
     objects.push(glObject5)
+    objects.push(glObject7)
     objects.push(glObject6)
 
     canvas.addEventListener('ui-rotate', (e: CustomEvent) => {
@@ -268,7 +283,7 @@ async function main() {
         
         gl.bindFramebuffer(gl.FRAMEBUFFER, fb)
         gl.viewport(0,0, gl.canvas.width, gl.canvas.height)
-        gl.enable(gl.CULL_FACE)
+        // gl.enable(gl.CULL_FACE)
         gl.enable(gl.DEPTH_TEST)
     
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)

@@ -132,17 +132,23 @@ async function main() {
 
     let objects = []
 
-    const glObject = makeCube(1, shaderProgram, gl)
-    glObject.setAnchorPoint([0,0,0], 3)
-    glObject.setPosition(200,200,700)
-    glObject.setRotation(0,0,0)
-    glObject.setScale(1,1,1)
-    glObject.setWireShader(wireShaderProgram)
-    glObject.setSelectShader(selectProgram)
-    glObject.bind()
+    var icosphere = new Icosphere(1, shaderProgram, gl)
+    icosphere.setRadius(50)
+    icosphere.setSubdivision(1)
+    const glObject1 = icosphere.getObject()
+    glObject1.setAnchorPoint([0,0,0], 3)
+    glObject1.setPosition(600,200,200)
+    glObject1.setRotation(0,0,0)
+    glObject1.setScale(1,1,1)
+    glObject1.setWireShader(wireShaderProgram)
+    glObject1.setSelectShader(selectProgram)
+    glObject1.bind()
 
-    const glObject2 = makeCube(2, shaderProgram, gl)
-    glObject2.setAnchorPoint(glObject.getPoint(6), 3)
+    var icosphere2 = new Icosphere(2, shaderProgram, gl)
+    icosphere2.setRadius(icosphere.radius)
+    icosphere2.setSubdivision(1)
+    const glObject2 = icosphere2.getObject()
+    glObject2.setAnchorPoint(glObject1.getPoint(77), 3)
     glObject2.setPosition(0,0,0)
     glObject2.setRotation(0,0,0)
     glObject2.setScale(1,1,1)
@@ -150,17 +156,23 @@ async function main() {
     glObject2.setSelectShader(selectProgram)
     glObject2.bind()
 
-    const glObject3 = makeCube(3, shaderProgram, gl)
-    glObject3.setAnchorPoint(glObject2.getPoint(2), 3)
+    var icosphere3 = new Icosphere(3, shaderProgram, gl)
+    icosphere3.setRadius(icosphere2.radius)
+    icosphere3.setSubdivision(1)
+    const glObject3 = icosphere3.getObject()
+    glObject3.setAnchorPoint(glObject2.getPoint(77), 3)
     glObject3.setPosition(0,0,0)
     glObject3.setRotation(0,0,0)
     glObject3.setScale(1,1,1)
     glObject3.setWireShader(wireShaderProgram)
     glObject3.setSelectShader(selectProgram)
     glObject3.bind()
-
-    const glObject4 = makeCube(4, shaderProgram, gl)
-    glObject4.setAnchorPoint(glObject4.getPoint(1), 3)
+    
+    var icosphere4 = new Icosphere(4, shaderProgram, gl)
+    icosphere4.setRadius(icosphere3.radius)
+    icosphere4.setSubdivision(1)
+    const glObject4 = icosphere4.getObject()
+    glObject4.setAnchorPoint(glObject3.getPoint(77), 3)
     glObject4.setPosition(0,0,0)
     glObject4.setRotation(0,0,0)
     glObject4.setScale(1,1,1)
@@ -168,29 +180,23 @@ async function main() {
     glObject4.setSelectShader(selectProgram)
     glObject4.bind()
 
-    const glObject5 = makeCube(5, shaderProgram, gl)
-    glObject5.setAnchorPoint([0, 0, 0], 3)
-    glObject5.setPosition(700,200,700)
+    var icosphere5 = new Icosphere(5, shaderProgram, gl)
+    icosphere5.setRadius(icosphere4.radius)
+    icosphere5.setSubdivision(1)
+    const glObject5 = icosphere5.getObject()
+    glObject5.setAnchorPoint(glObject4.getPoint(77), 3)
+    glObject5.setPosition(0,0,0)
     glObject5.setRotation(0,0,0)
     glObject5.setScale(1,1,1)
     glObject5.setWireShader(wireShaderProgram)
     glObject5.setSelectShader(selectProgram)
     glObject5.bind()
 
-    var icosphere = new Icosphere(6, shaderProgram, gl)
-    icosphere.setRadius(100)
-    icosphere.setSubdivision(1)
-    const glObject7 = icosphere.getObject()
-    glObject7.setAnchorPoint(glObject5.getPoint(5), 3)
-    glObject7.setPosition(0,0,0)
-    glObject7.setRotation(0,0,0)
-    glObject7.setScale(1,1,1)
-    glObject7.setWireShader(wireShaderProgram)
-    glObject7.setSelectShader(selectProgram)
-    glObject7.bind()
-
-    const glObject6 = makeCube(7, shaderProgram, gl)
-    glObject6.setAnchorPoint(glObject7.getPoint(6), 3)
+    var icosphere6 = new Icosphere(6, shaderProgram, gl)
+    icosphere6.setRadius(icosphere5.radius)
+    icosphere6.setSubdivision(1)
+    const glObject6 = icosphere6.getObject()
+    glObject6.setAnchorPoint(glObject5.getPoint(77), 3)
     glObject6.setPosition(0,0,0)
     glObject6.setRotation(0,0,0)
     glObject6.setScale(1,1,1)
@@ -198,20 +204,116 @@ async function main() {
     glObject6.setSelectShader(selectProgram)
     glObject6.bind()
 
-    // parent;
-    glObject3.addChild(glObject4)
-    glObject2.addChild(glObject3)
-    glObject.addChild(glObject2)
-    glObject5.addChild(glObject7)
-    glObject7.addChild(glObject6)
+    var icosphere7 = new Icosphere(7, shaderProgram, gl)
+    icosphere7.setRadius(icosphere6.radius)
+    icosphere7.setSubdivision(1)
+    const glObject7 = icosphere7.getObject()
+    glObject7.setAnchorPoint(glObject6.getPoint(77), 3)
+    glObject7.setPosition(0,0,0)
+    glObject7.setRotation(0,0,0)
+    glObject7.setScale(1,1,1)
+    glObject7.setWireShader(wireShaderProgram)
+    glObject7.setSelectShader(selectProgram)
+    glObject7.bind()
 
-    objects.push(glObject)
+    var icosphere8 = new Icosphere(8, shaderProgram, gl)
+    icosphere8.setRadius(icosphere7.radius)
+    icosphere8.setSubdivision(1)
+    const glObject8 = icosphere8.getObject()
+    glObject8.setAnchorPoint(glObject7.getPoint(77), 3)
+    glObject8.setPosition(0,0,0)
+    glObject8.setRotation(0,0,0)
+    glObject8.setScale(1,1,1)
+    glObject8.setWireShader(wireShaderProgram)
+    glObject8.setSelectShader(selectProgram)
+    glObject8.bind()
+
+    var icosphere9 = new Icosphere(9, shaderProgram, gl)
+    icosphere9.setRadius(icosphere8.radius)
+    icosphere9.setSubdivision(1)
+    const glObject9 = icosphere9.getObject()
+    glObject9.setAnchorPoint(glObject8.getPoint(77), 3)
+    glObject9.setPosition(0,0,0)
+    glObject9.setRotation(0,0,0)
+    glObject9.setScale(1,1,1)
+    glObject9.setWireShader(wireShaderProgram)
+    glObject9.setSelectShader(selectProgram)
+    glObject9.bind()
+
+    var icosphere10 = new Icosphere(10, shaderProgram, gl)
+    icosphere10.setRadius(icosphere9.radius)
+    icosphere10.setSubdivision(1)
+    const glObject10 = icosphere10.getObject()
+    glObject10.setAnchorPoint(glObject9.getPoint(77), 3)
+    glObject10.setPosition(0,0,0)
+    glObject10.setRotation(0,0,0)
+    glObject10.setScale(1,1,1)
+    glObject10.setWireShader(wireShaderProgram)
+    glObject10.setSelectShader(selectProgram)
+    glObject10.bind()
+
+    var icosphere11 = new Icosphere(11, shaderProgram, gl)
+    icosphere11.setRadius(icosphere10.radius)
+    icosphere11.setSubdivision(1)
+    const glObject11 = icosphere11.getObject()
+    glObject11.setAnchorPoint(glObject10.getPoint(77), 3)
+    glObject11.setPosition(0,0,0)
+    glObject11.setRotation(0,0,0)
+    glObject11.setScale(1,1,1)
+    glObject11.setWireShader(wireShaderProgram)
+    glObject11.setSelectShader(selectProgram)
+    glObject11.bind()
+
+    var icosphere12 = new Icosphere(12, shaderProgram, gl)
+    icosphere12.setRadius(icosphere11.radius)
+    icosphere12.setSubdivision(1)
+    const glObject12 = icosphere12.getObject()
+    glObject12.setAnchorPoint(glObject11.getPoint(77), 3)
+    glObject12.setPosition(0,0,0)
+    glObject12.setRotation(0,0,0)
+    glObject12.setScale(1,1,1)
+    glObject12.setWireShader(wireShaderProgram)
+    glObject12.setSelectShader(selectProgram)
+    glObject12.bind()
+
+
+    // var icosphere = new Icosphere(1, shaderProgram, gl)
+    // icosphere.setRadius(100)
+    // icosphere.setSubdivision(1)
+    // const glObject1 = icosphere.getObject()
+    // glObject1.setAnchorPoint([0,0,0], 3)
+    // glObject1.setPosition(500,200,0)
+    // glObject1.setRotation(0,0,0)
+    // glObject1.setScale(1,1,1)
+    // glObject1.setWireShader(wireShaderProgram)
+    // glObject1.setSelectShader(selectProgram)
+    // glObject1.bind()
+    
+    // parent;
+    glObject1.addChild(glObject2)
+    glObject2.addChild(glObject3)
+    glObject3.addChild(glObject4)
+    glObject4.addChild(glObject5)
+    glObject5.addChild(glObject6)
+    glObject6.addChild(glObject7)
+    glObject7.addChild(glObject8)
+    glObject8.addChild(glObject9)
+    glObject9.addChild(glObject10)
+    glObject10.addChild(glObject11)
+    // glObject11.addChild(glObject12)
+
+    objects.push(glObject1)
     objects.push(glObject2)
     objects.push(glObject3)
     objects.push(glObject4)
     objects.push(glObject5)
-    objects.push(glObject7)
     objects.push(glObject6)
+    objects.push(glObject7)
+    objects.push(glObject8)
+    objects.push(glObject9)
+    objects.push(glObject10)
+    objects.push(glObject11)
+    // objects.push(glObject12)
 
     canvas.addEventListener('ui-rotate', (e: CustomEvent) => {
         console.log('ui-rotate event')
@@ -244,8 +346,7 @@ async function main() {
     })
 
     const renderer = new Renderer()
-    renderer.addObject(glObject)
-    renderer.addObject(glObject5)
+    renderer.addObject(glObject1)
 
     // Create a texture to render to
     const targetTexture = gl.createTexture();
@@ -277,7 +378,49 @@ async function main() {
     let oldPickNdx = -1
     let oldPickColor
 
+    var speed = 0
+    var extend = false
+    var maxDegree = 75
+
     function render(now: number) {
+        if(!extend){
+            speed = 2
+
+            glObject2.setRotation(glObject2.rot3[0], glObject2.rot3[1], glObject2.rot3[2] + speed)
+            glObject3.setRotation(glObject3.rot3[0], glObject3.rot3[1], glObject3.rot3[2] - speed/8)
+            glObject4.setRotation(glObject4.rot3[0], glObject4.rot3[1], glObject4.rot3[2] - speed/8)
+            glObject5.setRotation(glObject5.rot3[0], glObject5.rot3[1], glObject5.rot3[2] - (speed - speed/8 - speed/8))
+            glObject6.setRotation(glObject6.rot3[0], glObject6.rot3[1], glObject6.rot3[2] - (speed - speed/8 - speed/8))
+            glObject7.setRotation(glObject7.rot3[0], glObject7.rot3[1], glObject7.rot3[2] - speed/8)
+            glObject8.setRotation(glObject8.rot3[0], glObject8.rot3[1], glObject8.rot3[2] - speed/8)
+            glObject9.setRotation(glObject9.rot3[0], glObject9.rot3[1], glObject9.rot3[2] + speed)
+            glObject10.setRotation(glObject10.rot3[0], glObject10.rot3[1], glObject10.rot3[2] + speed/4)
+
+            if(glObject2.rot3[2] >= maxDegree){
+                extend = true
+            }
+        } else {
+            speed = 3
+            var x = glObject1.pos[0] - Math.cos(glObject1.rot3[1] * Math.PI / 180) * speed
+            var y = glObject1.pos[1]
+            var z = glObject1.pos[2]
+            glObject1.setPosition(x,y,z)
+            glObject2.setRotation(glObject2.rot3[0], glObject2.rot3[1], glObject2.rot3[2] - speed)
+            glObject3.setRotation(glObject3.rot3[0], glObject3.rot3[1], glObject3.rot3[2] + speed/8)
+            glObject4.setRotation(glObject4.rot3[0], glObject4.rot3[1], glObject4.rot3[2] + speed/8)
+            glObject5.setRotation(glObject5.rot3[0], glObject5.rot3[1], glObject5.rot3[2] + (speed - speed/8 - speed/8))
+            glObject6.setRotation(glObject6.rot3[0], glObject6.rot3[1], glObject6.rot3[2] + (speed - speed/8 - speed/8))
+            glObject7.setRotation(glObject7.rot3[0], glObject7.rot3[1], glObject7.rot3[2] + speed/8)
+            glObject8.setRotation(glObject8.rot3[0], glObject8.rot3[1], glObject8.rot3[2] + speed/8)
+            glObject9.setRotation(glObject9.rot3[0], glObject9.rot3[1], glObject9.rot3[2] - speed)
+            glObject10.setRotation(glObject10.rot3[0], glObject10.rot3[1], glObject10.rot3[2] - speed/4)
+
+
+            if(glObject2.rot3[2] < 0){
+                extend = false
+            }
+        }
+
 
         setFramebufferAttachmentSizes(gl.canvas.width, gl.canvas.height);
         

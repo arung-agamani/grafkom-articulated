@@ -18,6 +18,7 @@ class Cube {
     this.calculatePoints()
     this.initIndices()
     this.initTextureCoords()
+    this.initNormals()
   }
 
   calculatePoints(){
@@ -127,13 +128,6 @@ class Cube {
   }
   private initNormals() {
     this.normals = [
-       0, 0, -1,
-       0, 0, -1,
-       0, 0, -1,
-       0, 0, -1,
-       0, 0, -1,
-       0, 0, -1,
-
        0, 0, 1,
        0, 0, 1,
        0, 0, 1,
@@ -141,6 +135,13 @@ class Cube {
        0, 0, 1,
        0, 0, 1,
 
+       0, 0, -1,
+       0, 0, -1,
+       0, 0, -1,
+       0, 0, -1,
+       0, 0, -1,
+       0, 0, -1,
+
        0, 1, 0,
        0, 1, 0,
        0, 1, 0,
@@ -155,29 +156,28 @@ class Cube {
        0, -1, 0,
        0, -1, 0,
 
-      -1, 0, 0,
-      -1, 0, 0,
-      -1, 0, 0,
-      -1, 0, 0,
-      -1, 0, 0,
-      -1, 0, 0,
+      1, 0, 0,
+      1, 0, 0,
+      1, 0, 0,
+      1, 0, 0,
+      1, 0, 0,
+      1, 0, 0,
 
-       1, 0, 0,
-       1, 0, 0,
-       1, 0, 0,
-       1, 0, 0,
-       1, 0, 0,
-       1, 0, 0,
+       -1, 0, 0,
+       -1, 0, 0,
+       -1, 0, 0,
+       -1, 0, 0,
+       -1, 0, 0,
+       -1, 0, 0,
     ]
   }
 
   public getObject(id: number, shader:WebGLProgram, gl:WebGL2RenderingContext){
-    console.log("makecube")
     let glObject = new GLObject(id, shader, gl)
-    console.log(this.points)
     glObject.setPoints(this.points)
     glObject.setIndices(this.indices)
     glObject.setTexCoords(this.textureCoords)
+    glObject.setNormals(this.normals)
     glObject.bind()
     return glObject;
   }

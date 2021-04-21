@@ -20,6 +20,8 @@ class GLObject {
     public anchorPoint: number[];
     public parentAnchorPoint: number[];
     public sceneDepth: number;
+    public textures: WebGLTexture[];
+    public mode: number;
 
     public model = {
         points: null,
@@ -28,6 +30,7 @@ class GLObject {
         wireIndices: null,
         texture: null,
         normals: null,
+        normalTexture: null,
     }
 
     public programInfo = {
@@ -39,9 +42,12 @@ class GLObject {
         },
         uniformLocations: {
             projectionMatrix: null,
-            color: null,
+            worldMatrix: null,
+            viewMatrix: null,
             resolution: null,
             textureSampler: null,
+            normalSampler: null,
+            mode: null,
         },
     }
 
@@ -149,9 +155,42 @@ class GLObject {
     setNormals(normals: number[]) {
         this.model.normals = normals;
     }
+    
+    setMode(mode: number){
+        this.mode = mode;
+    }
+
+    setNormalMap(src: string){
+        
+        const gl = this.gl
+
+        var texture = gl.createTexture()
+        gl.bindTexture(gl.TEXTURE_2D, texture)
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0,0,255,255]))
+        
+
+        var image = new Image()
+        image.src = src
+        image.onload = function() {
+            function isPowerOf2(value: number) {
+                return (value & (value - 1)) == 0;
+              }
+            gl.bindTexture(gl.TEXTURE_2D, texture)
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image)
+            if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
+                gl.generateMipmap(gl.TEXTURE_2D);
+             } else {
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+             }
+        }
+        this.model.normalTexture = texture
+    }
 
     setTexture(src: string) {
         const gl = this.gl
+        
         var texture = gl.createTexture()
         gl.bindTexture(gl.TEXTURE_2D, texture)
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0,0,255,255]))
@@ -174,6 +213,64 @@ class GLObject {
         }
 
         this.model.texture = texture
+
+        // var texture = gl.createTexture();
+        // gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+        
+        // const faceInfos = [
+        // {
+        //     target: gl.TEXTURE_CUBE_MAP_POSITIVE_X,
+        //     url: 'pos-x.jpg',
+        // },
+        // {
+        //     target: gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
+        //     url: '/neg-x.jpg',
+        // },
+        // {
+        //     target: gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
+        //     url: 'pos-y.jpg',
+        // },
+        // {
+        //     target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
+        //     url: 'neg-y.jpg',
+        // },
+        // {
+        //     target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
+        //     url: 'pos-z.jpg',
+        // },
+        // {
+        //     target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
+        //     url: 'neg-z.jpg',
+        // },
+        // ];
+        // faceInfos.forEach((faceInfo) => {
+        //     const {target, url} = faceInfo;
+            
+        //     // Upload the canvas to the cubemap face.
+        //     const level = 0;
+        //     const internalFormat = gl.RGBA;
+        //     const width = 512;
+        //     const height = 512;
+        //     const format = gl.RGBA;
+        //     const type = gl.UNSIGNED_BYTE;
+            
+        //     // setup each face so it's immediately renderable
+        //     gl.texImage2D(target, level, internalFormat, width, height, 0, format, type, null);
+            
+        //     // Asynchronously load an image
+        //     const image = new Image();
+        //     image.src = url;
+        //     image.addEventListener('load', function() {
+        //         // Now that the image has loaded upload it to the texture.
+        //         gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+        //         gl.texImage2D(target, level, internalFormat, format, type, image);
+        //         gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+        //     });
+        // });
+        // gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+        // gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+
+        // this.model.texture = texture
     }
 
     setObjectTexture(texture: WebGLTexture) { this.model.texture = texture }
@@ -409,13 +506,16 @@ class GLObject {
             attribLocations: {
                 vertexPosition: gl.getAttribLocation(shader, 'a_pos'),
                 textureCoord: gl.getAttribLocation(shader, 'a_texcoord'),
-                normalPosition: gl.getAttribLocation(shader, 'a_normal')
+                normalPosition: gl.getAttribLocation(shader, 'a_normal'),
             },
             uniformLocations: {
                 projectionMatrix: gl.getUniformLocation(shader, 'u_proj_mat'),
-                color: gl.getUniformLocation(shader, 'u_fragColor'),
+                worldMatrix: gl.getUniformLocation(shader, 'u_world'),
+                viewMatrix: gl.getUniformLocation(shader, 'u_view'),
                 resolution: gl.getUniformLocation(shader, 'u_resolution'),
                 textureSampler: gl.getUniformLocation(shader, "u_texture"),
+                normalSampler: gl.getUniformLocation(shader, 'u_normal_map'),
+                mode: gl.getUniformLocation(shader, 'mode'),
             },
         }
     }
@@ -437,9 +537,27 @@ class GLObject {
         gl.vertexAttribPointer(this.programInfo.attribLocations.textureCoord, 2, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(this.programInfo.attribLocations.textureCoord)
 
+        gl.uniform1i(this.programInfo.uniformLocations.mode, this.mode)
         gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, this.projectionMat)
-        gl.uniform4fv(this.programInfo.uniformLocations.color, this.color)
+        gl.uniformMatrix4fv(this.programInfo.uniformLocations.worldMatrix, false, [
+            1,0,0,0,
+            0,1,0,0,
+            0,0,1,0,
+            0,0,0,1
+        ])
+        gl.uniformMatrix4fv(this.programInfo.uniformLocations.viewMatrix, false, [
+            1,0,0,0,
+            0,1,0,0,
+            0,0,1,0,
+            0,0,0,1
+        ])
+
+        // gl.uniform4fv(this.programInfo.uniformLocations.color, this.color)
         gl.uniform3fv(this.programInfo.uniformLocations.resolution, [gl.canvas.width, gl.canvas.height, this.sceneDepth])
+        
+        gl.activeTexture(gl.TEXTURE1)
+        gl.bindTexture(gl.TEXTURE_2D, this.model.normalTexture)
+        gl.uniform1i(this.programInfo.uniformLocations.normalSampler, 1)
         
         gl.activeTexture(gl.TEXTURE0)
         gl.bindTexture(gl.TEXTURE_2D, this.model.texture)

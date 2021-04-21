@@ -27,12 +27,14 @@ class GLObject {
         textureCoords: null,
         wireIndices: null,
         texture: null,
+        normals: null,
     }
 
     public programInfo = {
         shader: null,
         attribLocations: {
             vertexPosition: null,
+            normalPosition: null,
             textureCoord: null,
         },
         uniformLocations: {
@@ -72,6 +74,7 @@ class GLObject {
         position: null,
         indices: null,
         textureCoord: null,
+        normals: null,
         wire: null,
     }
 
@@ -143,6 +146,10 @@ class GLObject {
         this.model.textureCoords = texcoords
     }
 
+    setNormals(normals: number[]) {
+        this.model.normals = normals;
+    }
+
     setTexture(src: string) {
         const gl = this.gl
         var texture = gl.createTexture()
@@ -168,6 +175,8 @@ class GLObject {
 
         this.model.texture = texture
     }
+
+    setObjectTexture(texture: WebGLTexture) { this.model.texture = texture }
 
     setPosition(x: number, y: number, z: number) {
         this.pos = [x,y,z];
@@ -370,9 +379,14 @@ class GLObject {
         gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.model.points), gl.STATIC_DRAW)
 
+        const normalBuffer = gl.createBuffer()
+        gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer)
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.model.normals), gl.STATIC_DRAW)
+
         const indexBuffer = gl.createBuffer()
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer)
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.model.indices), gl.STATIC_DRAW)
+        
 
         const textureCoordBuffer = gl.createBuffer()
         gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer)
@@ -383,6 +397,7 @@ class GLObject {
             indices: indexBuffer,
             textureCoord: textureCoordBuffer,
             wire: null,
+            normals: normalBuffer
         }
 
     }
@@ -394,6 +409,7 @@ class GLObject {
             attribLocations: {
                 vertexPosition: gl.getAttribLocation(shader, 'a_pos'),
                 textureCoord: gl.getAttribLocation(shader, 'a_texcoord'),
+                normalPosition: gl.getAttribLocation(shader, 'a_normal')
             },
             uniformLocations: {
                 projectionMatrix: gl.getUniformLocation(shader, 'u_proj_mat'),
@@ -412,6 +428,10 @@ class GLObject {
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.position)
         gl.vertexAttribPointer(this.programInfo.attribLocations.vertexPosition, 3, gl.FLOAT, false, 0, 0)
         gl.enableVertexAttribArray(this.programInfo.attribLocations.vertexPosition)
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.normals)
+        gl.vertexAttribPointer(this.programInfo.attribLocations.normalPosition, 3, gl.FLOAT, false, 0, 0)
+        gl.enableVertexAttribArray(this.programInfo.attribLocations.normalPosition)
         
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.textureCoord)
         gl.vertexAttribPointer(this.programInfo.attribLocations.textureCoord, 2, gl.FLOAT, false, 0, 0);

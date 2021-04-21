@@ -7,6 +7,7 @@ class Cube {
   public points: Array<number>
   public indices: Array<number>
   public textureCoords: Array<number>
+  public normals: Array<number>
   public baseValue: number
 
   constructor(){
@@ -122,6 +123,51 @@ class Cube {
       1.0,  0.0,
       1.0,  1.0,
       0.0,  1.0,
+    ]
+  }
+  private initNormals() {
+    this.normals = [
+       0, 0, -1,
+       0, 0, -1,
+       0, 0, -1,
+       0, 0, -1,
+       0, 0, -1,
+       0, 0, -1,
+
+       0, 0, 1,
+       0, 0, 1,
+       0, 0, 1,
+       0, 0, 1,
+       0, 0, 1,
+       0, 0, 1,
+
+       0, 1, 0,
+       0, 1, 0,
+       0, 1, 0,
+       0, 1, 0,
+       0, 1, 0,
+       0, 1, 0,
+
+       0, -1, 0,
+       0, -1, 0,
+       0, -1, 0,
+       0, -1, 0,
+       0, -1, 0,
+       0, -1, 0,
+
+      -1, 0, 0,
+      -1, 0, 0,
+      -1, 0, 0,
+      -1, 0, 0,
+      -1, 0, 0,
+      -1, 0, 0,
+
+       1, 0, 0,
+       1, 0, 0,
+       1, 0, 0,
+       1, 0, 0,
+       1, 0, 0,
+       1, 0, 0,
     ]
   }
 

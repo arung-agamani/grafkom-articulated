@@ -1,5 +1,6 @@
 import { multiplyMatrix } from './utils/matrix'
 import { fetchShader } from './loaders/shader'
+import { loadCubemap } from './loaders/cubemap'
 import GLObject from './GLObject'
 import Renderer from './renderer'
 import { GLOperationMode, GLDrawMode } from './types/glTypes'
@@ -91,6 +92,26 @@ async function main() {
     gl.attachShader(selectProgram, selectVertShader)
     gl.attachShader(selectProgram, selectFragShader)
     gl.linkProgram(selectProgram)
+
+    var envVert = await fetchShader('env-vert.glsl')
+    var envFrag = await fetchShader('env-frag.glsl')
+    
+    var envVertShader = gl.createShader(gl.VERTEX_SHADER)
+    gl.shaderSource(envVertShader, envVert)
+    gl.compileShader(envVertShader)
+    if (!gl.getShaderParameter(envVertShader, gl.COMPILE_STATUS)) {
+        alert('Error when compiling shaders: ' + gl.getShaderInfoLog(envVertShader))
+    }
+    var envFragShader = gl.createShader(gl.FRAGMENT_SHADER)
+    gl.shaderSource(envFragShader, envFrag)
+    gl.compileShader(envFragShader)
+    if (!gl.getShaderParameter(envFragShader, gl.COMPILE_STATUS)) {
+        alert('Error when compiling shaders: ' + gl.getShaderInfoLog(envFragShader))
+    }
+    var envShaderProgram = gl.createProgram()
+    gl.attachShader(envShaderProgram, envVertShader)
+    gl.attachShader(envShaderProgram, envFragShader)
+    gl.linkProgram(envShaderProgram)
 
     // mouseevent block
     canvas.addEventListener('mousemove', (event) => {
@@ -233,7 +254,7 @@ async function main() {
     const cube = new Cube()
     const glObject13 = cube.getObject(13, shaderProgram, gl)
     glObject13.setAnchorPoint([0,0,0], 3)
-    glObject13.setPosition(500,100,200)
+    glObject13.setPosition(500,400,200)
     glObject13.setRotation(0,0,0)
     glObject13.setScale(1,1,1)
     glObject13.setWireShader(wireShaderProgram)
@@ -248,6 +269,17 @@ async function main() {
     glObject14.setWireShader(wireShaderProgram)
     glObject14.setSelectShader(selectProgram)
     glObject14.setTexture("cubetexture.png")
+
+    const cubemapTexture = loadCubemap(gl)
+    const glObject15 = cube.getObject(15, envShaderProgram, gl)
+    glObject15.setAnchorPoint([0,0,0], 3)
+    glObject15.setPosition(100,400,200)
+    glObject15.setRotation(0,0,0)
+    glObject15.setScale(1,1,1)
+    glObject15.setWireShader(wireShaderProgram)
+    glObject15.setSelectShader(selectProgram)
+    glObject15.setNormals(cube.normals)
+    glObject15.setObjectTexture(cubemapTexture)
     
     // parent;
     glObject1.addChild(glObject2)
@@ -277,6 +309,9 @@ async function main() {
     objects.push(glObject12)
     objects.push(glObject13)
     objects.push(glObject14)
+    objects.push(glObject15)
+
+    
 
     canvas.addEventListener('ui-rotate', (e: CustomEvent) => {
         console.log('ui-rotate event')
@@ -311,6 +346,7 @@ async function main() {
     const renderer = new Renderer()
     renderer.addObject(glObject1)
     renderer.addObject(glObject13)
+    renderer.addObject(glObject15)
 
     // Create a texture to render to
     const targetTexture = gl.createTexture();

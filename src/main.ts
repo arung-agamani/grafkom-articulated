@@ -254,7 +254,7 @@ async function main() {
     const cube = new Cube()
     const glObject13 = cube.getObject(13, shaderProgram, gl)
     glObject13.setAnchorPoint([0,0,0], 3)
-    glObject13.setPosition(500,400,200)
+    glObject13.setPosition(500,300,200)
     glObject13.setRotation(0,0,0)
     glObject13.setScale(1,1,1)
     glObject13.setWireShader(wireShaderProgram)
@@ -270,17 +270,34 @@ async function main() {
     glObject14.setSelectShader(selectProgram)
     glObject14.setTexture("cubetexture.png")
 
-    const cubemapTexture = loadCubemap(gl)
-    const glObject15 = cube.getObject(15, envShaderProgram, gl)
+    // const cubemapTexture = loadCubemap(gl)
+    const glObject15 = cube.getObject(15, shaderProgram, gl)
     glObject15.setAnchorPoint([0,0,0], 3)
-    glObject15.setPosition(100,400,200)
+    glObject15.setPosition(300,400,100)
     glObject15.setRotation(0,0,0)
     glObject15.setScale(1,1,1)
     glObject15.setWireShader(wireShaderProgram)
     glObject15.setSelectShader(selectProgram)
-    glObject15.setNormals(cube.normals)
-    glObject15.setObjectTexture(cubemapTexture)
+    glObject15.setTexture("cubetexture.png")
     
+    const glObject16 = cube.getObject(16, shaderProgram, gl)
+    glObject16.setAnchorPoint([0,100,0], 3)
+    glObject16.setPosition(0,0,0)
+    glObject16.setRotation(0,0,0)
+    glObject16.setScale(1,1,1)
+    glObject16.setWireShader(wireShaderProgram)
+    glObject16.setSelectShader(selectProgram)
+    glObject16.setTexture("cubetexture.png")
+    
+    const glObject17 = cube.getObject(17, shaderProgram, gl)
+    glObject17.setAnchorPoint([0,100,0], 3)
+    glObject17.setPosition(0,0,0)
+    glObject17.setRotation(0,0,0)
+    glObject17.setScale(1,1,1)
+    glObject17.setWireShader(wireShaderProgram)
+    glObject17.setSelectShader(selectProgram)
+    glObject17.setTexture("cubetexture.png")
+
     // parent;
     glObject1.addChild(glObject2)
     glObject2.addChild(glObject3)
@@ -294,6 +311,9 @@ async function main() {
     glObject10.addChild(glObject11)
     // glObject11.addChild(glObject12)
     glObject13.addChild(glObject14)
+    // glObject14.addChild(glObject15)
+    glObject15.addChild(glObject16)
+    glObject16.addChild(glObject17)
 
     objects.push(glObject1)
     objects.push(glObject2)
@@ -310,7 +330,9 @@ async function main() {
     objects.push(glObject13)
     objects.push(glObject14)
     objects.push(glObject15)
-
+    objects.push(glObject16)
+    objects.push(glObject17)
+    
     
 
     canvas.addEventListener('ui-rotate', (e: CustomEvent) => {
@@ -382,6 +404,11 @@ async function main() {
     var extend = false
     var maxDegree = 75
 
+    // box states
+    let boxDegree = 0
+    let boxMaxDegree = 30
+    let boxSign = 1
+
     function render(now: number) {
         if(!extend){
             speed = 2
@@ -420,6 +447,15 @@ async function main() {
                 extend = false
             }
         }
+
+        // box animation, thingy
+        glObject15.setRotation(glObject15.rot3[0], glObject15.rot3[1], glObject15.rot3[2] + (1 * boxSign))
+        glObject16.setRotation(glObject16.rot3[0], glObject16.rot3[1], glObject16.rot3[2] + (1 * boxSign))
+        glObject17.setRotation(glObject17.rot3[0], glObject17.rot3[1], glObject17.rot3[2] + (1 * boxSign))
+        glObject15.setRotation(glObject15.rot3[0], glObject15.rot3[1], glObject15.rot3[2]+1)
+        boxDegree += boxSign
+        if (boxDegree >= boxMaxDegree) boxSign *= -1
+        if (boxDegree <= (boxMaxDegree*-1)) boxSign *= -1
 
 
         setFramebufferAttachmentSizes(gl.canvas.width, gl.canvas.height);
